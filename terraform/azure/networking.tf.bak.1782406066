@@ -1,6 +1,6 @@
 
 data "azurerm_network_watcher" "existing" {
-  name                = data.azurerm_network_watcher.existing.name
+  name                = "NetworkWatcher_switzerlandnorth"
   resource_group_name = "NetworkWatcherRG"
 }
 
@@ -118,7 +118,7 @@ resource "azurerm_network_watcher_flow_log" "flow_log" {
   enabled                   = true
   network_security_group_id = azurerm_network_security_group.bad_sg.id
   network_watcher_name      = data.azurerm_network_watcher.existing.name
-  resource_group_name       = data.azurerm_network_watcher.existing.resource_group_name
+  resource_group_name       = azurerm_resource_group.example.name
   storage_account_id        = azurerm_storage_account.example.id
 
   retention_policy {
