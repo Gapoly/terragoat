@@ -10,7 +10,7 @@ locals {
 resource "azurerm_application_gateway" "network" {
   name                = "example-appgateway"
   resource_group_name = "example-resourceGroup"
-  location            = "example --West-US"
+  location            = var.location
 
   sku {
     name     = "Standard_Small"

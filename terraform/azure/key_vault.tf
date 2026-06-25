@@ -8,11 +8,11 @@ resource "azurerm_key_vault" "example" {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
     key_permissions = [
-      "create",
-      "get",
+      "Create",
+      "Get",
     ]
     secret_permissions = [
-      "set",
+      "Set",
     ]
   }
   tags = merge({
