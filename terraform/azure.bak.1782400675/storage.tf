@@ -1,7 +1,7 @@
 /*resource "azurerm_managed_disk" "example" {
   name                 = "terragoat-disk-${var.environment}"
   location             = var.location
-  storage_account_type = "StandardSSD_LRS"
+  storage_account_type = "Standard_LRS"
   create_option        = "Empty"
   disk_size_gb         = 1
 
@@ -20,7 +20,7 @@ resource "azurerm_storage_account" "example" {
   resource_group_name      = azurerm_resource_group.example.name
   location                 = azurerm_resource_group.example.location
   account_tier             = "Standard"
-  account_replication_type = "LRS"
+  account_replication_type = "GRS"
 
   min_tls_version                 = "TLS1_2"
   https_traffic_only_enabled      = true
