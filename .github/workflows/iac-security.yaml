@@ -1,0 +1,67 @@
+name: IaC Security Pipeline
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+env:
+  TF_DIR: terraform/aws
+  TF_VERSION: "0.12.31"
+
+jobs:
+  terraform-checkov:
+    name: Terraform validation and security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform format check
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform validate -no-color
+
+      - name: Checkov scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ${{ env.TF_DIR }}
+          framework: terraform
+          output_format: cli,sarif,json
+          output_file_path: console,results.sarif,results.json
+          soft_fail: true
+
+      - name: Upload Checkov reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov-reports
+          path: |
+            results.sarif
+            results.json
+
+      - name: Upload SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
