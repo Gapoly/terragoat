@@ -1,0 +1,145 @@
+name: CI-CD Terraform Azure TerraGoat
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "terraform/azure/**"
+      - ".github/workflows/iac-azure.yml"
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "terraform/azure/**"
+      - ".github/workflows/iac-azure.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: write
+  pull-requests: write
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_WORKING_DIR: "terraform/azure"
+
+  ARM_USE_OIDC: "true"
+  ARM_USE_AZUREAD: "true"
+  ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+  ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+
+  TF_VAR_subscription_id: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+  TF_VAR_environment: "${{ vars.TF_VAR_environment }}"
+  TF_VAR_location: "${{ vars.TF_VAR_location }}"
+
+jobs:
+  validate-and-scan:
+    name: Validate and security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Terraform format check
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init without backend
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: Checkov scan on Terraform files
+        uses: bridgecrewio/checkov-action@v12
+        continue-on-error: true
+        with:
+          directory: terraform/azure
+          framework: terraform
+          output_format: cli,json,sarif,github_failed_only
+          output_file_path: reports/checkov
+
+      - name: Upload Checkov reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov-terraform-reports
+          path: reports/
+          retention-days: 90
+
+  plan-and-deploy:
+    name: Terraform plan and deploy
+    runs-on: ubuntu-latest
+    needs: validate-and-scan
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init with Azure backend
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform init -reconfigure \
+            -backend-config="resource_group_name=${{ vars.TF_STATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ vars.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TF_STATE_CONTAINER }}" \
+            -backend-config="key=${{ vars.TF_VAR_environment }}.terraform.tfstate" \
+            -backend-config="use_oidc=true" \
+            -backend-config="use_azuread_auth=true" \
+            -backend-config="tenant_id=${{ vars.AZURE_TENANT_ID }}" \
+            -backend-config="client_id=${{ vars.AZURE_CLIENT_ID }}"
+
+      - name: Terraform plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform plan -out=tfplan
+          terraform show -json tfplan > ../../reports/tfplan.json
+
+      - name: Checkov scan on Terraform plan
+        uses: bridgecrewio/checkov-action@v12
+        continue-on-error: true
+        with:
+          file: reports/tfplan.json
+          framework: terraform_plan
+          output_format: cli,json,sarif,github_failed_only
+          output_file_path: reports/checkov-plan
+
+      - name: Upload Terraform plan and security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-and-security-reports
+          path: |
+            reports/
+            terraform/azure/tfplan
+          retention-days: 90
+
+      - name: Terraform apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan
