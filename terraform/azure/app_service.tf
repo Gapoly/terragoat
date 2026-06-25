@@ -1,38 +1,51 @@
-resource "azurerm_app_service_plan" "example" {
-  name                = "terragoat-app-service-plan-${var.environment}"
-  location            = azurerm_resource_group.example.location
+resource "azurerm_service_plan" "example" {
+  name                = "terragoat-app-service-plan-${var.environment}${random_integer.rnd_int.result}"
+  location            = var.location
   resource_group_name = azurerm_resource_group.example.name
 
-  sku {
-    tier = "Dynamic"
-    size = "S1"
-  }
+  os_type  = "Linux"
+  sku_name = "S1"
+
   tags = {
-    git_commit           = "898d5beaec7ffdef6df0d7abecff407362e2a74e"
-    git_file             = "terraform/azure/app_service.tf"
-    git_last_modified_at = "2020-06-17 12:59:55"
-    git_last_modified_by = "nimrodkor@gmail.com"
-    git_modifiers        = "nimrodkor"
-    git_org              = "bridgecrewio"
-    git_repo             = "terragoat"
-    yor_trace            = "6611bf45-fd5b-467e-b119-d533cd7539b8"
+    environment = var.environment
+    terragoat   = true
   }
 }
 
-resource "azurerm_app_service" "app-service1" {
-  app_service_plan_id = azurerm_app_service_plan.example.id
-  location            = var.location
+resource "azurerm_linux_web_app" "app_service1" {
   name                = "terragoat-app-service-${var.environment}${random_integer.rnd_int.result}"
+  location            = var.location
   resource_group_name = azurerm_resource_group.example.name
+  service_plan_id     = azurerm_service_plan.example.id
 
-  https_only = true
+  https_only                 = true
+  client_certificate_enabled = true
+
+  identity {
+    type = "SystemAssigned"
+  }
 
   site_config {
-    min_tls_version = "1.2"
+    minimum_tls_version = "1.2"
+    http2_enabled       = true
+    ftps_state          = "Disabled"
+    health_check_path   = "/"
   }
 
   auth_settings {
     enabled = true
+  }
+
+  logs {
+    http_logs {
+      file_system {
+        retention_in_days = 7
+        retention_in_mb   = 35
+      }
+    }
+
+    failed_request_tracing  = true
+    detailed_error_messages = true
   }
 
   tags = {
@@ -41,16 +54,40 @@ resource "azurerm_app_service" "app-service1" {
   }
 }
 
-resource "azurerm_app_service" "app-service2" {
-  app_service_plan_id = azurerm_app_service_plan.example.id
-  location            = var.location
+resource "azurerm_linux_web_app" "app_service2" {
   name                = "terragoat-app-service-auth-${var.environment}${random_integer.rnd_int.result}"
+  location            = var.location
   resource_group_name = azurerm_resource_group.example.name
+  service_plan_id     = azurerm_service_plan.example.id
 
-  https_only = true
+  https_only                 = true
+  client_certificate_enabled = true
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  site_config {
+    minimum_tls_version = "1.2"
+    http2_enabled       = true
+    ftps_state          = "Disabled"
+    health_check_path   = "/"
+  }
 
   auth_settings {
     enabled = true
+  }
+
+  logs {
+    http_logs {
+      file_system {
+        retention_in_days = 7
+        retention_in_mb   = 35
+      }
+    }
+
+    failed_request_tracing  = true
+    detailed_error_messages = true
   }
 
   tags = {

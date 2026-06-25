@@ -1,10 +1,10 @@
 resource "azurerm_storage_account" "security_storage_account" {
-  name                      = "securitystorageaccount-${var.environment}${random_integer.rnd_int.result}"
-  resource_group_name       = azurerm_resource_group.example.name
-  location                  = azurerm_resource_group.example.location
-  account_tier              = "Standard"
-  account_replication_type  = "LRS"
-  enable_https_traffic_only = true
+  name                       = "securitystorageaccount-${var.environment}${random_integer.rnd_int.result}"
+  resource_group_name        = azurerm_resource_group.example.name
+  location                   = azurerm_resource_group.example.location
+  account_tier               = "Standard"
+  account_replication_type   = "LRS"
+  https_traffic_only_enabled = true
   tags = {
     git_commit           = "a1d1c1ce31a1bde6dafa188846d90eca82abe5fd"
     git_file             = "terraform/azure/mssql.tf"
