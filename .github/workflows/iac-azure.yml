@@ -140,7 +140,7 @@ jobs:
       - name: Terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          terraform plan -out=tfplan
+          terraform plan -out=tfplan -lock=false
           terraform show -json tfplan > ../../reports/tfplan.json
 
       - name: Checkov scan on Terraform plan
