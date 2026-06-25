@@ -19,13 +19,13 @@ resource "azurerm_application_gateway" "network" {
   }
 
   gateway_ip_configuration {
-    name      = "my-gateway-ip-configuration"
-    subnet_id = "your subnet id"
+    name      = "appGatewayIpConfig"
+    subnet_id = azurerm_subnet.example.id
   }
 
   frontend_port {
-    name = "name"
-    port = "port-no"
+    name = local.frontend_port_name
+    port = 80
   }
   ####Missing WAF block: As per azure best practices, it is important to have a web application firewall enabled at application gateway.
 
