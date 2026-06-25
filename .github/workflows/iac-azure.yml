@@ -27,6 +27,8 @@ env:
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
   TF_WORKING_DIR: "terraform/azure"
+  TF_REGISTRY_CLIENT_TIMEOUT: "300"
+  TF_REGISTRY_DISCOVERY_RETRY: "5"
 
   ARM_USE_OIDC: "true"
   ARM_USE_AZUREAD: "true"
@@ -105,6 +107,19 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        
+      - name: Cache Terraform providers
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
+      - name: Configure Terraform plugin cache
+        run: |
+          mkdir -p ~/.terraform.d/plugin-cache
+          echo 'plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
 
       - name: Terraform init with Azure backend
         working-directory: ${{ env.TF_WORKING_DIR }}
