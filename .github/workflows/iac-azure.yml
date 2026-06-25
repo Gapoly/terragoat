@@ -59,7 +59,7 @@ jobs:
 
       - name: Terraform init without backend
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -backend=false
+        run: terraform init -backend=false -upgrade
 
       - name: Terraform validate
         working-directory: ${{ env.TF_WORKING_DIR }}
