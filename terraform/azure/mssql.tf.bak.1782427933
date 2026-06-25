@@ -25,5 +25,4 @@ resource "azurerm_mssql_database" "mssql_db" {
     environment = var.environment
     terragoat   = true
   }
-  storage_account_type = "Local"
 }
