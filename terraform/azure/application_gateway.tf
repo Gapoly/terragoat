@@ -9,7 +9,7 @@ locals {
 
 resource "azurerm_application_gateway" "network" {
   name                = "example-appgateway"
-  resource_group_name = "example-resourceGroup"
+  resource_group_name = azurerm_resource_group.example.name
   location            = var.location
 
   sku {
@@ -22,7 +22,7 @@ resource "azurerm_application_gateway" "network" {
     name      = "appGatewayIpConfig"
     subnet_id = azurerm_subnet.example.id
   }
-
+ 
   frontend_port {
     name = local.frontend_port_name
     port = 80
