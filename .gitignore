@@ -26,6 +26,7 @@ credentials.json
 *.tfbackend
 *.tfvars
 .terraform.lock.hcl
+terraform.tfvars
 
 # Include override files you do wish to add to version control using negated pattern
 #
