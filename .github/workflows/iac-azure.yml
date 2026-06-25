@@ -137,8 +137,8 @@ jobs:
       - name: Create reports directory
         run: mkdir -p reports
 
-      - name: Unlock Terraform
-        run: terraform force-unlock -force 7b900182-1bb5-ef88-b2cb-7c86c1785ac1
+      #- name: Unlock Terraform
+        #run: terraform force-unlock -force 7b900182-1bb5-ef88-b2cb-7c86c1785ac1
 
       - name: Terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
