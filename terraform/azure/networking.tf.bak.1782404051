@@ -1,6 +1,6 @@
 
 data "azurerm_network_watcher" "existing" {
-  name                = "NetworkWatcher_switzerlandnorth"
+  name                = "NetworkWatcher_francecentral"
   resource_group_name = "NetworkWatcherRG"
 }
 
