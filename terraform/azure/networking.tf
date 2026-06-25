@@ -74,35 +74,30 @@ resource "azurerm_network_security_group" "bad_sg" {
   security_rule {
     access                     = "Allow"
     direction                  = "Inbound"
-    name                       = "AllowSSH"
+    name                       = "AllowSSHFromAdmin"
     priority                   = 200
-    protocol                   = "TCP"
-    source_address_prefix      = "*"
+    protocol                   = "Tcp"
+    source_address_prefix      = var.admin_ip_cidr
     source_port_range          = "*"
-    destination_port_range     = "22-22"
+    destination_port_range     = "22"
     destination_address_prefix = "*"
   }
 
   security_rule {
     access                     = "Allow"
     direction                  = "Inbound"
-    name                       = "AllowRDP"
+    name                       = "AllowRDPFromAdmin"
     priority                   = 300
-    protocol                   = "TCP"
-    source_address_prefix      = "*"
+    protocol                   = "Tcp"
+    source_address_prefix      = var.admin_ip_cidr
     source_port_range          = "*"
-    destination_port_range     = "3389-3389"
+    destination_port_range     = "3389"
     destination_address_prefix = "*"
   }
+
   tags = {
-    git_commit           = "5c6b5d60a8aa63a5d37e60f15185d13a967f0542"
-    git_file             = "terraform/azure/networking.tf"
-    git_last_modified_at = "2021-05-02 10:06:10"
-    git_last_modified_by = "nimrodkor@users.noreply.github.com"
-    git_modifiers        = "nimrodkor"
-    git_org              = "bridgecrewio"
-    git_repo             = "terragoat"
-    yor_trace            = "1a591ba4-d969-4572-9704-87b5c55c0ba3"
+    environment = var.environment
+    terragoat   = true
   }
 }
 
@@ -123,14 +118,15 @@ resource "azurerm_network_watcher" "network_watcher" {
 }
 
 resource "azurerm_network_watcher_flow_log" "flow_log" {
-  enabled                   = false
+  enabled                   = true
   network_security_group_id = azurerm_network_security_group.bad_sg.id
   network_watcher_name      = azurerm_network_watcher.network_watcher.name
   resource_group_name       = azurerm_resource_group.example.name
   storage_account_id        = azurerm_storage_account.example.id
+
   retention_policy {
-    enabled = false
-    days    = 10
+    enabled = true
+    days    = 90
   }
   tags = {
     git_commit           = "898d5beaec7ffdef6df0d7abecff407362e2a74e"

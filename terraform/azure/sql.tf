@@ -12,7 +12,7 @@ resource "azurerm_sql_server" "example" {
   location                     = azurerm_resource_group.example.location
   version                      = "12.0"
   administrator_login          = "ariel"
-  administrator_login_password = "Aa12345678"
+  administrator_login_password = var.sql_admin_password
   tags = merge({
     environment = var.environment
     terragoat   = "true"
@@ -43,30 +43,27 @@ resource "azurerm_mssql_server_security_alert_policy" "example" {
 
 resource "azurerm_mysql_server" "example" {
   name                = "terragoat-mysql-${var.environment}${random_integer.rnd_int.result}"
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.example.name
 
-  administrator_login          = "terragoat-${var.environment}"
-  administrator_login_password = random_string.password.result
+  administrator_login          = "mysqladmin"
+  administrator_login_password = var.sql_admin_password
 
-  sku_name   = "B_Gen5_2"
+  sku_name   = "B_Gen5_1"
   storage_mb = 5120
   version    = "5.7"
 
   auto_grow_enabled                 = true
   backup_retention_days             = 7
+  geo_redundant_backup_enabled      = false
   infrastructure_encryption_enabled = true
-  public_network_access_enabled     = true
-  ssl_enforcement_enabled           = false
+
+  ssl_enforcement_enabled          = true
+  ssl_minimal_tls_version_enforced = "TLS1_2"
+
   tags = {
-    git_commit           = "81738b80d571fa3034633690d13ffb460e1e7dea"
-    git_file             = "terraform/azure/sql.tf"
-    git_last_modified_at = "2020-06-19 21:14:50"
-    git_last_modified_by = "Adin.Ermie@outlook.com"
-    git_modifiers        = "Adin.Ermie/nimrodkor"
-    git_org              = "bridgecrewio"
-    git_repo             = "terragoat"
-    yor_trace            = "1ac18c16-09a4-41c9-9a66-6f514050178e"
+    environment = var.environment
+    terragoat   = true
   }
 }
 
@@ -80,9 +77,9 @@ resource "azurerm_postgresql_server" "example" {
   geo_redundant_backup_enabled = false
   auto_grow_enabled            = true
   administrator_login          = "terragoat"
-  administrator_login_password = "Aa12345678"
+  administrator_login_password = var.sql_admin_password
   version                      = "9.5"
-  ssl_enforcement_enabled      = false
+  ssl_enforcement_enabled      = true
   tags = {
     git_commit           = "81738b80d571fa3034633690d13ffb460e1e7dea"
     git_file             = "terraform/azure/sql.tf"
