@@ -107,7 +107,7 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        
+
       - name: Cache Terraform providers
         uses: actions/cache@v4
         with:
@@ -151,6 +151,9 @@ jobs:
           framework: terraform_plan
           output_format: cli,json,sarif,github_failed_only
           output_file_path: reports/checkov-plan
+
+      - name: Unlock Terraform
+        run: terraform force-unlock 7b900182-1bb5-ef88-b2cb-7c86c1785ac1
 
       - name: Upload Terraform plan and security reports
         uses: actions/upload-artifact@v4
