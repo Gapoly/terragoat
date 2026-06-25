@@ -137,10 +137,13 @@ jobs:
       - name: Create reports directory
         run: mkdir -p reports
 
+      - name: Unlock Terraform
+        run: terraform force-unlock -force 7b900182-1bb5-ef88-b2cb-7c86c1785ac1
+
       - name: Terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          terraform plan -out=tfplan -lock=false
+          terraform plan -out=tfplan
           terraform show -json tfplan > ../../reports/tfplan.json
 
       - name: Checkov scan on Terraform plan
@@ -151,9 +154,6 @@ jobs:
           framework: terraform_plan
           output_format: cli,json,sarif,github_failed_only
           output_file_path: reports/checkov-plan
-
-      - name: Unlock Terraform
-        run: terraform force-unlock 7b900182-1bb5-ef88-b2cb-7c86c1785ac1
 
       - name: Upload Terraform plan and security reports
         uses: actions/upload-artifact@v4
