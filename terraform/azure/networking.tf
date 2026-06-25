@@ -113,26 +113,8 @@ resource "azurerm_network_security_group" "bad_sg" {
 # On réutilise donc le Network Watcher existant via data.azurerm_network_watcher.existing.
 
 
-resource "azurerm_network_watcher_flow_log" "flow_log" {
-  name                      = "terragoat-flowlog-${var.environment}"
-  enabled                   = true
-  network_security_group_id = azurerm_network_security_group.bad_sg.id
-  network_watcher_name      = data.azurerm_network_watcher.existing.name
-  resource_group_name       = data.azurerm_network_watcher.existing.resource_group_name
-  storage_account_id        = azurerm_storage_account.example.id
 
-  retention_policy {
-    enabled = true
-    days    = 90
-  }
-  tags = {
-    git_commit           = "898d5beaec7ffdef6df0d7abecff407362e2a74e"
-    git_file             = "terraform/azure/networking.tf"
-    git_last_modified_at = "2020-06-17 12:59:55"
-    git_last_modified_by = "nimrodkor@gmail.com"
-    git_modifiers        = "nimrodkor"
-    git_org              = "bridgecrewio"
-    git_repo             = "terragoat"
-    yor_trace            = "33a7212e-7f1a-49fc-af73-8e525c5546ec"
-  }
-}
+# NSG Flow Logs désactivés.
+# Azure bloque la création de nouveaux NSG Flow Logs depuis le 30/06/2025.
+# La recommandation Azure est de migrer vers les Virtual Network Flow Logs.
+
