@@ -1,4 +1,4 @@
-resource azurerm_app_service_plan "example" {
+resource "azurerm_app_service_plan" "example" {
   name                = "terragoat-app-service-plan-${var.environment}"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
@@ -19,7 +19,7 @@ resource azurerm_app_service_plan "example" {
   }
 }
 
-resource azurerm_app_service "app-service1" {
+resource "azurerm_app_service" "app-service1" {
   app_service_plan_id = azurerm_app_service_plan.example.id
   location            = var.location
   name                = "terragoat-app-service-${var.environment}${random_integer.rnd_int.result}"
@@ -40,7 +40,7 @@ resource azurerm_app_service "app-service1" {
   }
 }
 
-resource azurerm_app_service "app-service2" {
+resource "azurerm_app_service" "app-service2" {
   app_service_plan_id = azurerm_app_service_plan.example.id
   location            = var.location
   name                = "terragoat-app-service-${var.environment}${random_integer.rnd_int.result}"

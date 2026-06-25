@@ -1,4 +1,4 @@
-resource azurerm_monitor_log_profile "logging_profile" {
+resource "azurerm_monitor_log_profile" "logging_profile" {
   storage_account_id = azurerm_storage_account.example.id
   categories         = ["Action"]
   locations          = [var.location]

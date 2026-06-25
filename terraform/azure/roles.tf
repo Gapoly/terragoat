@@ -1,4 +1,4 @@
-data azurerm_subscription current_subscription {}
+data "azurerm_subscription" "current_subscription" {}
 
 resource "azurerm_role_definition" "example" {
   name        = "my-custom-role"

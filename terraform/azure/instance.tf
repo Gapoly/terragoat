@@ -1,4 +1,4 @@
-resource random_string "password" {
+resource "random_string" "password" {
   length      = 16
   special     = false
   min_lower   = 1
@@ -6,7 +6,7 @@ resource random_string "password" {
   min_upper   = 1
 }
 
-resource azurerm_linux_virtual_machine "linux_machine" {
+resource "azurerm_linux_virtual_machine" "linux_machine" {
   admin_username                  = "terragoat-linux"
   admin_password                  = random_string.password.result
   location                        = var.location
@@ -41,7 +41,7 @@ resource azurerm_linux_virtual_machine "linux_machine" {
   })
 }
 
-resource azurerm_windows_virtual_machine "windows_machine" {
+resource "azurerm_windows_virtual_machine" "windows_machine" {
   admin_password        = random_string.password.result
   admin_username        = "tg-${var.environment}"
   location              = var.location
