@@ -1,3 +1,21 @@
+
+resource "azurerm_network_interface" "linux_nic" {
+  name                = "terragoat-linux-nic-${var.environment}"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.example.id
+    private_ip_address_allocation = "Dynamic"
+  }
+
+  tags = {
+    environment = var.environment
+    terragoat   = true
+  }
+}
+
 resource "random_string" "password" {
   length      = 16
   special     = false
@@ -7,17 +25,27 @@ resource "random_string" "password" {
 }
 
 resource "azurerm_linux_virtual_machine" "linux_machine" {
-  admin_username                  = "terragoat-linux"
-  location                        = var.location
-  name                            = "terragoat-linux"
-  network_interface_ids           = [azurerm_network_interface.ni_linux.id]
-  resource_group_name             = azurerm_resource_group.example.name
-  size                            = "Standard_B2s_v2"
+  name                = "terragoat-linux"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  size                = "Standard_B1s"
+
+  admin_username                  = "azureuser"
   disable_password_authentication = true
 
+  network_interface_ids = [
+    azurerm_network_interface.linux_nic.id
+  ]
+
   admin_ssh_key {
-    username   = "terragoat-linux"
+    username   = "azureuser"
     public_key = var.admin_ssh_public_key
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+    disk_size_gb         = 30
   }
 
   source_image_reference {
@@ -25,11 +53,6 @@ resource "azurerm_linux_virtual_machine" "linux_machine" {
     offer     = "0001-com-ubuntu-server-jammy"
     sku       = "22_04-lts"
     version   = "latest"
-  }
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
   }
 
   tags = {
@@ -45,10 +68,11 @@ resource "azurerm_windows_virtual_machine" "windows_machine" {
   name                  = "tg-win"
   network_interface_ids = [azurerm_network_interface.ni_win.id]
   resource_group_name   = azurerm_resource_group.example.name
-  size                  = "Standard_B2s_v2"
+  size                  = "Standard_B1s"
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "StandardSSD_LRS"
+    disk_size_gb         = 30
   }
 
   source_image_reference {
