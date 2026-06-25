@@ -119,6 +119,9 @@ jobs:
             -backend-config="tenant_id=${{ vars.AZURE_TENANT_ID }}" \
             -backend-config="client_id=${{ vars.AZURE_CLIENT_ID }}"
 
+      - name: Create reports directory
+        run: mkdir -p reports
+
       - name: Terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
