@@ -23,7 +23,7 @@ resource "azurerm_kubernetes_cluster" "k8s_cluster" {
 
   default_node_pool {
     name       = "default"
-    vm_size    = "Standard_B2ats_v2"
+    vm_size    = "Standard_DC2as_v5"
     node_count = 1
   }
 
