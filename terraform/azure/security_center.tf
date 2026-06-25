@@ -3,6 +3,7 @@ resource "azurerm_security_center_subscription_pricing" "pricing" {
 }
 
 resource "azurerm_security_center_contact" "contact" {
+  name                = "default1"
   email               = "admin-securite@example.com"
   phone               = "+33123456789"
   alert_notifications = true

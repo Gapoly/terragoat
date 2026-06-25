@@ -118,6 +118,7 @@ resource "azurerm_network_watcher" "network_watcher" {
 }
 
 resource "azurerm_network_watcher_flow_log" "flow_log" {
+  name                      = "terragoat-flowlog-${var.environment}"
   enabled                   = true
   network_security_group_id = azurerm_network_security_group.bad_sg.id
   network_watcher_name      = azurerm_network_watcher.network_watcher.name

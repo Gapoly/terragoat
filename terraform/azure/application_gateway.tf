@@ -1,3 +1,12 @@
+locals {
+  backend_address_pool_name      = "appGatewayBackendPool"
+  frontend_port_name             = "appGatewayFrontendPort"
+  frontend_ip_configuration_name = "appGatewayFrontendIP"
+  http_setting_name              = "appGatewayBackendHttpSettings"
+  listener_name                  = "appGatewayHttpListener"
+  request_routing_rule_name      = "appGatewayRoutingRule"
+}
+
 resource "azurerm_application_gateway" "network" {
   name                = "example-appgateway"
   resource_group_name = "example-resourceGroup"
