@@ -188,4 +188,6 @@ Nous avons pu déployer ces ressources :
 - Réseau virtuel
 - Compte de stockage
 
+---
+
 ![conclusion](images/conclusion.png)
